@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ArchiSaludable — Catálogo</title>
-  <meta name="description" content="ArchiSaludable - Productos de salud y bienestar" />
+  <title>ArchiPapu — Catálogo</title>
+  <meta name="description" content="ArchiPapu - Productos de salud y bienestar" />
   <style>
     :root{
       --bg:#031425;
@@ -224,7 +224,6 @@
     .contenido-list{margin-top:8px; padding-left:18px; color:var(--muted); font-size:15px; line-height:1.5}
 
     /* Prevent background scroll when modal is open (class toggled via JS) */
-    /* NOTE: removed touch-action:none to allow touch scrolling INSIDE modal overlay on mobile devices */
     body.modal-open{overflow:hidden;}
 
     /* WhatsApp floating */
@@ -251,9 +250,9 @@
   <header class="hero" role="banner">
     <div class="brand">
       <!-- replace logo-placeholder.png by your image later -->
-      <img class="logo" id="siteLogo" src="logo-placeholder.png" alt="ArchiSaludable logo">
+      <img class="logo" id="siteLogo" src="logo-placeholder.png" alt="ArchiPapu logo">
       <div>
-        <p class="site-title" id="siteTitle">ArchiSaludable</p>
+        <p class="site-title" id="siteTitle">ArchiPapu</p>
         <p class="site-sub" id="siteLead">Tu espacio de salud y bienestar</p>
       </div>
     </div>
@@ -293,7 +292,7 @@
   </main>
 
   <footer>
-    <small>© <span id="year"></span> ArchiSaludable — Demo</small>
+    <small>© <span id="year"></span> ArchiPapu — Demo</small>
   </footer>
 
   <!-- Modal de detalle -->
@@ -356,11 +355,13 @@
 
   <script>
     /**************************************************************************
-     * ArchiSaludable UPD v6:
-     * - Replaces local video with embedded YouTube player (inline, no redirect).
-     * - cc_load_policy=1 is used to show captions if available; cc_lang_pref=es is set as preference.
-     * - On modal close the iframe src is cleared to stop playback.
-     * - Preservation of images and previous features ensured.
+     * ArchiPapu UPD:
+     * - Nombre: ArchiPapu (título y branding)
+     * - Prioriza modal/video sobre música de fondo:
+     *    * Al entrar a un video (YouTube o local) la música baja suavemente y luego se pausa.
+     *    * Al salir del video (o cambiar a imagen) la música reanuda con un fade-in suave
+     *      solo si fue pausada por el video y si previamente estaba en reproducción.
+     * - Se respetan pausas manuales del usuario (si el usuario pausó la música, no se reanuda).
      **************************************************************************/
 
     const PLACEHOLDER_SVG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
@@ -378,13 +379,11 @@
     }
     function isYouTubeUrl(url){
       if(!url) return false;
-      // accept youtu.be short links and youtube.com/watch/embed/v/ links
       const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([A-Za-z0-9_-]{11})/);
       return m ? m[1] : false;
     }
     function getYouTubeThumbnail(id){ return `https://img.youtube.com/vi/${id}/hqdefault.jpg`; }
     function getYouTubeEmbedUrl(id){
-      // enablejsapi=1 so JS can control (we clear src on close), cc_load_policy=1 to request captions, cc_lang_pref=es preferred
       return `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&enablejsapi=1&cc_load_policy=1&cc_lang_pref=es`;
     }
     function getMediaPreviewSrc(src){
@@ -462,9 +461,8 @@
           cat:'belleza',
           sub:'Cuidado facial',
           images:[
-            'Probiotic_OMNILIFE_6724761.PNG',
-            'Probiotic_OMNILIFE_caja_sobre.PNG',
-            // <-- vídeo de YouTube (se reproduce inline en el modal)
+            'Probiotic_OMNILIFE_6724761.png',
+            'Probiotic_OMNILIFE_caja_sobre.png',
             'https://youtu.be/rSHir4Kf9SE'
           ]
         },
@@ -600,11 +598,19 @@
     let musicStarted = false;
     let currentTrackIdx = 0;
 
+    // flags to manage resume only-if-paused-by-video
+    let pausedBackgroundByVideo = false;
+    let backgroundWasPlayingBeforeVideo = false;
+    let backgroundOriginalVolume = 0.6;
+    let fadeTimer = null; // used to clear fade intervals
+
     function playTrackAt(index){
       if(index < 0 || index >= musicTracks.length) index = 0;
       currentTrackIdx = index;
       audio.src = musicTracks[index].url;
       audio.load();
+      // keep original volume variable updated
+      backgroundOriginalVolume = audio.volume;
       audio.play().catch(()=>{ /* se iniciará con interacción del usuario si el navegador lo bloquea */ });
     }
 
@@ -626,6 +632,108 @@
       if(musicStarted) return;
       startPlaylistRandomFirst();
     }, {once:true, capture:true});
+
+    // --- Fade helpers (promesas para encadenar) ---
+    function clearFade(){
+      if(fadeTimer){ clearInterval(fadeTimer); fadeTimer = null; }
+    }
+
+    function fadeOutBackground(duration = 600){
+      return new Promise((resolve) => {
+        try{
+          clearFade();
+          if(!audio) return resolve();
+          const startVol = parseFloat((audio.volume || 0).toFixed(3));
+          if(startVol <= 0.0001){ audio.volume = 0; return resolve(); }
+          const stepMs = 60;
+          const steps = Math.max(1, Math.round(duration / stepMs));
+          const delta = startVol / steps;
+          let currentStep = 0;
+          fadeTimer = setInterval(() => {
+            currentStep++;
+            const newVol = Math.max(0, startVol - delta * currentStep);
+            audio.volume = parseFloat(newVol.toFixed(3));
+            if(currentStep >= steps){
+              clearFade();
+              audio.volume = 0;
+              resolve();
+            }
+          }, stepMs);
+        }catch(e){ clearFade(); resolve(); }
+      });
+    }
+
+    function fadeInBackground(targetVol = 0.6, duration = 600){
+      return new Promise((resolve) => {
+        try{
+          clearFade();
+          if(!audio) return resolve();
+          const stepMs = 60;
+          const steps = Math.max(1, Math.round(duration / stepMs));
+          const startVol = parseFloat((audio.volume || 0).toFixed(3));
+          const delta = (targetVol - startVol) / steps;
+          let currentStep = 0;
+          fadeTimer = setInterval(() => {
+            currentStep++;
+            let newVol = startVol + delta * currentStep;
+            newVol = Math.min(targetVol, Math.max(0, newVol));
+            audio.volume = parseFloat(newVol.toFixed(3));
+            if(currentStep >= steps){
+              clearFade();
+              audio.volume = parseFloat(targetVol.toFixed(3));
+              resolve();
+            }
+          }, stepMs);
+        }catch(e){ clearFade(); resolve(); }
+      });
+    }
+
+    // --- Functions to pause/resume background music around modal video (with fades) ---
+    async function pauseBackgroundMusicForVideo(){
+      // Pause the background music only if it's currently playing.
+      try{
+        if(!audio) return;
+        if(!audio.paused){
+          backgroundWasPlayingBeforeVideo = true;
+          // store the original volume to restore later
+          backgroundOriginalVolume = audio.volume || 0.6;
+          // fade out, then pause
+          await fadeOutBackground(600);
+          try{ audio.pause(); }catch(e){}
+          pausedBackgroundByVideo = true;
+        } else {
+          // audio already paused by user; don't mark as paused by video
+          backgroundWasPlayingBeforeVideo = false;
+          pausedBackgroundByVideo = false;
+        }
+      }catch(e){
+        backgroundWasPlayingBeforeVideo = false;
+        pausedBackgroundByVideo = false;
+      }
+    }
+
+    async function resumeBackgroundMusicAfterVideo(){
+      // Re-enable only if we paused it for the video and it was playing before the video
+      try{
+        if(pausedBackgroundByVideo && backgroundWasPlayingBeforeVideo){
+          // start playing if needed, set volume to 0 and fade in to original
+          try{
+            // set volume to 0 before starting to avoid a pop (some browsers will enforce user gesture)
+            audio.volume = 0;
+            const playPromise = audio.play();
+            // attempt to play; if rejected, still attempt fade-in but it won't be audible until allowed
+            if(playPromise && typeof playPromise.then === 'function'){
+              await playPromise.catch(()=>{ /* ignore */ });
+            }
+            await fadeInBackground(backgroundOriginalVolume, 600);
+          }catch(e){
+            /* ignore play/fade errors */
+          }
+        }
+      }catch(e){}
+      pausedBackgroundByVideo = false;
+      backgroundWasPlayingBeforeVideo = false;
+    }
 
     // --- DOM helpers ---
     const $ = s => document.querySelector(s);
@@ -767,24 +875,30 @@
     function setModalMedia(src){
       clearAllMedia();
       if(!src){
+        // switching to non-media (or nothing) — resume music if paused by video
+        resumeBackgroundMusicAfterVideo();
         modalImage.src = PLACEHOLDER_SVG;
         modalImage.style.display = 'block';
         return;
       }
       const ytId = isYouTubeUrl(src);
       if(ytId){
-        // show iframe with subtitles requested (cc_load_policy=1) and cc_lang_pref=es
+        // we are switching to a YouTube video -> prioritize/pause background music (with fade)
+        pauseBackgroundMusicForVideo();
         modalYoutube.src = getYouTubeEmbedUrl(ytId);
         modalYoutube.style.display = 'block';
         return;
       }
       if(isVideoFile(src)){
+        // local video file -> pause background music (with fade)
+        pauseBackgroundMusicForVideo();
         modalVideo.src = src;
         modalVideo.style.display = 'block';
         modalVideo.currentTime = 0;
         return;
       }
-      // image
+      // image -> resume background music if it was paused by video
+      resumeBackgroundMusicAfterVideo();
       const tmp = new Image();
       tmp.onload = () => { modalImage.src = src; modalImage.style.display = 'block'; };
       tmp.onerror = () => { modalImage.src = PLACEHOLDER_SVG; modalImage.style.display = 'block'; };
@@ -847,7 +961,6 @@
       modalThumbs.innerHTML = '';
       if(p.images && p.images.length){
         p.images.forEach((src, i) => {
-          // if it's a YouTube link, show thumbnail image; if it's a local video file show a small video element as thumb
           const yt = isYouTubeUrl(src);
           if(isVideoFile(src)){
             const vid = document.createElement('video');
@@ -882,7 +995,7 @@
             modalThumbs.appendChild(im);
           }
         });
-        // set first media
+        // set first media (this will automatically pause background if first is a video)
         setModalMedia(p.images[0]);
       } else {
         setModalMedia('');
@@ -913,6 +1026,9 @@
       document.body.classList.remove('modal-open');
       modalImage.src = '';
       modalThumbs.innerHTML = '';
+
+      // resume background music if we had paused it for the video (with fade)
+      resumeBackgroundMusicAfterVideo();
     }
 
     // image click toggles zoom (desktop/mobile)
@@ -993,7 +1109,18 @@
     init();
 
     // expose for debugging
-    window._archi = { DATA, state, applyFilters, openModal, closeModal, isYouTubeUrl };
+    window._archi = {
+      DATA,
+      state,
+      applyFilters,
+      openModal,
+      closeModal,
+      isYouTubeUrl,
+      pauseBackgroundMusicForVideo,
+      resumeBackgroundMusicAfterVideo,
+      fadeInBackground,
+      fadeOutBackground
+    };
 
   </script>
 </body>
