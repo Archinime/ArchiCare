@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archinime OS - Habitación Interactiva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <link rel="stylesheet" href="lobby-style.css">
+</head>
+<body>
+
+    <div id="room-background"></div>
+
+    <main id="room-container">
+
+        <header id="hud-layer">
+            <div class="stats-box">
+                <span id="level">Nivel: 1</span>
+                <span id="affinity">Afinidad: ❤️ <span id="affinity-val">0</span></span>
+            </div>
+            <div class="stats-box">
+                <span id="coins">🪙 <span id="coins-val">100</span></span>
+                <span id="energy">⚡ <span id="energy-val">100</span>/100</span>
+            </div>
+        </header>
+
+        <div id="character-layer">
+<model-viewer 
+    id="waifu-placeholder" 
+    src="marin.GLB" 
+    camera-controls 
+    autoplay 
+    disable-zoom
+    shadow-intensity="1">
+</model-viewer>
+        </div>
+
+        <nav id="tablet-ui">
+            <div class="tablet-screen">
+                <div class="tablet-header">Archinime OS</div>
+                <div class="apps-grid">
+                    <div class="app-icon" onclick="window.location.href='catalogo.html'">
+                        <i class="fas fa-play-circle" style="color: var(--neon-cyan);"></i>
+                        <span>Catálogo</span>
+                        <div class="notification-badge">3</div>
+                    </div>
+                    <div class="app-icon" id="app-tienda" onclick="alert('Tienda en construcción')">
+                        <i class="fas fa-shopping-cart" style="color: var(--neon-purple);"></i>
+                        <span>Tienda</span>
+                    </div>
+                    <div class="app-icon" id="app-gacha" onclick="alert('Gacha en construcción')">
+                        <i class="fas fa-box-open" style="color: var(--neon-pink);"></i>
+                        <span>Gacha</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+    </main>
+
+    <script src="lobby-main.js"></script>
+</body>
+</html>
