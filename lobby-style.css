@@ -61,20 +61,20 @@ body {
     z-index: 5;
 }
 
-/* Actualizado para el modelo 3D */
+/* Se mejoró el contenedor del modelo para que no parezca un "placeholder" */
 #waifu-placeholder {
-    width: 300px;
-    height: 500px;
-    border-radius: 20px;
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    background-color: transparent; 
-    transition: all 0.3s;
     outline: none;
+    transition: all 0.3s;
 }
 
 #waifu-placeholder:hover {
-    box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
-    background: rgba(0, 243, 255, 0.05);
+    filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.4));
 }
 
 /* --- LA TABLET --- */
@@ -82,7 +82,7 @@ body {
     position: absolute;
     bottom: -10px;
     right: 40px;
-    width: 350px;
+    width: 380px; /* Un poco más ancha para las 4 apps */
     height: 250px;
     background: #000;
     border: 4px solid #333;
@@ -121,8 +121,8 @@ body {
 
 .apps-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(4, 1fr); /* Actualizado a 4 columnas */
+    gap: 10px;
 }
 
 .app-icon {
@@ -135,14 +135,14 @@ body {
     transition: transform 0.2s;
 }
 
-.app-icon i { font-size: 2rem; }
-.app-icon span { font-size: 0.75rem; text-align: center; }
+.app-icon i { font-size: 1.8rem; }
+.app-icon span { font-size: 0.65rem; text-align: center; font-weight: bold; }
 .app-icon:hover { transform: scale(1.1); }
 
 .notification-badge {
     position: absolute;
     top: -5px;
-    right: 5px;
+    right: 0px;
     background: var(--neon-pink);
     color: white;
     font-size: 0.7rem;
@@ -153,4 +153,80 @@ body {
     justify-content: center;
     align-items: center;
     box-shadow: 0 0 10px var(--neon-pink);
+}
+
+/* --- MODAL SELECCIÓN DE PERSONAJE --- */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    background: var(--glass-bg);
+    border: 1px solid var(--neon-cyan);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+}
+
+.modal-content h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--neon-cyan);
+    margin-bottom: 25px;
+}
+
+.char-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.char-btn {
+    background: rgba(188, 19, 254, 0.1);
+    border: 1px solid var(--neon-purple);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.char-btn:hover {
+    background: var(--neon-purple);
+    box-shadow: 0 0 15px var(--neon-purple);
+    transform: translateY(-3px);
+}
+
+.close-btn {
+    background: transparent;
+    border: 1px solid var(--neon-pink);
+    color: var(--neon-pink);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: var(--neon-pink);
+    color: white;
+    box-shadow: 0 0 15px var(--neon-pink);
 }

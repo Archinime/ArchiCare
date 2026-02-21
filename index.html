@@ -27,14 +27,14 @@
         </header>
 
         <div id="character-layer">
-<model-viewer 
-    id="waifu-placeholder" 
-    src="marin.glb" 
-    camera-controls 
-    autoplay 
-    disable-zoom
-    shadow-intensity="1">
-</model-viewer>
+            <model-viewer 
+                id="waifu-placeholder" 
+                src="marin.glb" 
+                camera-controls 
+                autoplay 
+                disable-zoom
+                shadow-intensity="1">
+            </model-viewer>
         </div>
 
         <nav id="tablet-ui">
@@ -54,11 +54,28 @@
                         <i class="fas fa-box-open" style="color: var(--neon-pink);"></i>
                         <span>Gacha</span>
                     </div>
+                    <div class="app-icon" id="app-chars" onclick="toggleCharModal(true)">
+                        <i class="fas fa-user-astronaut" style="color: #00ffaa;"></i>
+                        <span>Personajes</span>
+                    </div>
                 </div>
             </div>
         </nav>
 
     </main>
+
+    <div id="character-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Seleccionar Avatar</h2>
+            <div class="char-grid">
+                <button class="char-btn" onclick="changeCharacter('marin.glb')">Marin Base</button>
+                <button class="char-btn" onclick="changeCharacter('marin2.glb')">Marin V2</button>
+                <button class="char-btn" onclick="changeCharacter('marin3.glb')">Marin V3</button>
+                <button class="char-btn" onclick="changeCharacter('marin4.glb')">Marin V4</button>
+            </div>
+            <button class="close-btn" onclick="toggleCharModal(false)">Cerrar Sistema</button>
+        </div>
+    </div>
 
     <script src="lobby-main.js"></script>
 </body>
