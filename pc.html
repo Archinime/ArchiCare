@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interfaz PC Virtual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="desktop">
+        
+        <div class="desktop-icon" onclick="openApp('browser')">
+            <div class="icon-img">🌐</div>
+            <span>Navegador</span>
+        </div>
+        <div class="desktop-icon" onclick="openApp('notes')">
+            <div class="icon-img">📝</div>
+            <span>Notas</span>
+        </div>
+
+        <div id="window-browser" class="window hidden">
+            <div class="window-header">
+                <span>Navegador Web</span>
+                <button class="close-btn" onclick="closeApp('browser')"></button>
+            </div>
+            <div class="window-content">
+                <div class="search-bar">
+                    <input type="text" placeholder="Buscar en la red virtual...">
+                    <button>Buscar</button>
+                </div>
+                <div class="browser-body">
+                    <h2>¡Conexión Establecida!</h2>
+                    <p>Aquí puedes integrar iframes, enlaces a otras partes de tu portafolio o más minijuegos.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="window-notes" class="window hidden">
+            <div class="window-header">
+                <span>Bloc de Notas</span>
+                <button class="close-btn" onclick="closeApp('notes')"></button>
+            </div>
+            <div class="window-content" style="padding: 0;">
+                <textarea placeholder="Escribe tus ideas aquí..." style="width: 100%; height: 100%; box-sizing: border-box; resize: none; border: none; padding: 10px; font-family: monospace;"></textarea>
+            </div>
+        </div>
+
+        <div id="start-menu" class="hidden">
+            <div class="start-header">Usuario Virtual</div>
+            <div class="start-item" onclick="openApp('browser')">🌐 Navegador Web</div>
+            <div class="start-item" onclick="openApp('notes')">📝 Bloc de Notas</div>
+            <hr style="border-color: #444;">
+            <div class="start-item" style="color: #ff5c5c;">🔌 Apagar (Volver al 3D)</div>
+        </div>
+
+        <div id="taskbar">
+            <button id="start-btn">Inicio</button>
+            <div id="clock">--:--</div>
+        </div>
+        
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
